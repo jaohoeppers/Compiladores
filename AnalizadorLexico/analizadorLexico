@@ -1,0 +1,419 @@
+import re
+
+def anaLIzador(entrada):
+    estados = [
+        {
+            'I': 1,
+            'E': 2,
+            'P': 3,
+            'F': 4,
+            'S': 5,
+            'W': 6,
+            'D': 7,
+            'R': 8,
+            '[0-9]': 9,
+            '[a-cghj-oqt-vx-z]': 10,
+            '[A-CGHJ-OQT-VX-Z]': 10,
+            '\+': 11,
+            '\-': 12,
+            '\*': 13,
+            '\/': 14,
+            '\%': 15,
+            # '--': 16,
+            # '++': 17,
+            '\<': 18,
+            '\>': 19,
+            # '<=': 20,
+            # '>=': 21,
+            '\^': 22,
+            '\!': 23,
+            '\(': 24,
+            '\)': 25,
+            '\[': 26,
+            '\]': 27,
+            '\{': 28,
+            '\}': 29
+        },
+        {
+            #1if
+            '[ABCDEGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'F': 30
+        },
+        {
+            #2else
+            'L': 31,
+            '[ABCDEFGHIJKMNOPQRSTUVWXYZ]': 10
+            
+        },
+        {
+            #3print
+            '[ABCDEFGHIJKLMNOPQSTUVWXYZ]': 10,
+            'R': 34
+        },
+        {
+            #4for
+            '[ABCDEFGHIJKLMNPQRSTUVWXYZ]': 10,
+            'O': 38
+        },
+        {
+            #5switch
+            '[ABCDEFGHIJKLMNOPQRSTUVXYZ]': 10,
+            'W': 40
+        },
+        {
+            #6while
+            '[ABCDEFGIJKLMNOPQRSTUVWXYZ]': 10,
+            'H': 47
+        },
+        {
+            #7do
+            '[ABCDEFGHIJKLMNPQRSTUVWXYZ]': 10,
+            'O': 51
+        },
+        {
+            #8READ
+            '[ABCDFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'E': 52
+        },
+        {
+            #9
+            '[a-z]': 10,
+            '[0-9]': 9
+        },
+        {
+            #10FINAL ID
+            '[a-z]': 10,
+            '[0-9]': 10
+        },
+        {
+            #11final+
+            '\+': 17,
+            '[a-z]': 10
+        },
+        {
+            #12final-
+            '\-': 16,
+            '[a-z]': 10
+        },
+        {
+            #13final*
+            '[a-z]': 10
+        },
+        {
+            #14final/
+            '[a-z]': 10
+        },
+        {
+            #15final%
+            '[a-z]': 10
+        },
+        {
+            #16final--
+            '[a-z]': 10
+        },
+        {
+            #17final++
+            '[a-z]': 10
+        },
+        {
+            #18final<
+            '=': 20,
+            '[a-z]': 10
+        },
+        {
+            #19final>
+            '\=': 21,
+            '[a-z]': 10
+        },
+        {
+            #20final<=
+            '[a-z]': 10
+        },
+        {
+            #21final>=
+            '[a-z]': 10
+        },
+        {
+            #22final^
+            '[a-z]': 10
+        },
+        {
+            '\=': 59,
+            '[a-z]': 10
+        },
+        {
+            #24final(
+            '[a-z]': 10
+        },
+        {
+            #25final)
+            '[a-z]': 10
+        },
+        {
+            #26final[
+            '[a-z]': 10
+        },
+        {
+            #27final]
+            '[a-z]': 10
+        },
+        {
+            #28final{
+            '[a-z]': 10
+        },
+        {
+            #29final}
+            '[a-z]': 10
+        },
+        {
+            #30FINAL IF
+            '[a-z]': 10
+        },
+        {
+            #31L
+            '[ABCDEFGHIJKLMNOPQRTUVWXYZ]': 10,
+            'S': 32
+        },
+        {
+            #32
+            '[ABCDFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'E': 33
+        },
+        {
+            #33FINAL ELSE
+            '[a-z]': 10
+        },
+        {
+            #34
+            '[ABCDEFGHJKLMNOPQRSTUVWXYZ]': 10,
+            'I': 35
+        },
+        {
+            #35
+            '[ABCDEFGHIJKLMOPQRSTUVWXYZ]': 10,
+            'N': 36
+        },
+        {
+            #36
+            '[ABCDEFGHIJKLMNOPQRSUVWXYZ]': 10,
+            'T': 37
+        },
+        {
+            #37FINAL PRINT
+            '[a-z]': 10
+        },
+        {
+            #38
+            '[ABCDEFGHIJKLMNOPQSTUVWXYZ]': 10,
+            'R': 39
+        },
+        {
+            #39FINAL FOR
+            'E': 55,
+            '[ABCDFGHIJKLMNOPQRSTUVWXYZ]': 10
+        },
+        {
+            #40
+            '[ABCDEFGHJKLMNOPQRSTUVWXYZ]': 10,
+            'I': 41
+        },
+        {
+            #41
+            '[ABCDEFGHIJKLMNOPQRSUVWXYZ]': 10,
+            'T': 42
+        },
+        {
+            #42
+            '[ABDEFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'C': 43
+        },
+        {
+            #43
+            '[ABCDEFGIJKLMNOPQRSTUVWXYZ]': 10,
+            'H': 46
+        },
+        {
+            #44
+            '[ABDEFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'C': 45
+        },
+        {
+            #45
+            '[ABCDEFGIJKLMNOPQRSTUVWXYZ]': 10,
+            'H': 46
+        },
+        {
+            #46FINAL SWITCH
+            '[a-z]': 10
+        },
+        {
+            #47
+            '[ABCDEFGHJKLMNOPQRSTUVWXYZ]': 10,
+            'I': 48
+        },
+        {
+            #48
+            '[ABCDEFGHIJKMNOPQRSTUVWXYZ]': 10,
+            'L': 49
+        },
+        {
+            #49
+            '[ABCDFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'E': 50
+        },
+        {
+            #50FINAL WHILE
+            '[a-z]': 10
+        },
+        {
+            #51FINAL DO
+            '[a-z]': 10
+        },
+        {
+            #52
+            '[BCDEFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'A': 53
+        },
+        {
+            #53
+            '[ABCEFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'D':54
+        },
+        {
+            #54FINAL READ
+            '[a-z]': 10
+        },
+        {
+            #55
+            '[BCDEFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'A':56
+        },
+        {
+            #56
+            '[ABDEFGHIJKLMNOPQRSTUVWXYZ]': 10,
+            'C':57
+        },
+        {
+            #57
+            '[ABCDEFGIJKLMNOPQRSTUVWXYZ]': 10,
+            'H':58
+        },
+        {
+            #58FINAL FOREACH
+            '[a-z]': 10
+        },
+        {
+            #59final!=
+            '[a-z]': 10
+        },
+        {
+            #60espaco
+        }
+    ]
+
+    finais = {
+        
+        11: '+, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        12: '-, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        13: '*, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        14: '/, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        15: '%, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        16: '--, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        17: '++, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        18: '<, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        19: '>, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        20: '<=, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        21: '>=, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        22: '^, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        24: '(, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        25: '), LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        26: '[, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        27: '], LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        28: '{, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        29: '}, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        30: 'IF, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        33: 'ELSE, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        37: 'PRINT, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        39: 'FOR, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII , POSIÇAO FINAL: PFFF',
+        46: 'SWITCH, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        50: 'WHILE, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        51: 'DO, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        54: 'READ, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        58: 'FOREACH ,LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+        10: 'ID, LEXEMA, LINHA: linhaa, POSIÇAO INICIAL: PIII, POSIÇAO FINAL: PFFF',
+    }
+
+    
+    token=[]
+
+    for linha_num, linha in enumerate(entrada, start=1):
+        for x in linha.split(' '):
+            estado_atual = 0
+            cadeia_atual = ''
+
+            for i in range(len(x)):
+                # if((x==(linha.split(' '))[-1]) & (i==x[-1])):
+                #     break
+
+                char = x[i]
+                cadeia_atual = cadeia_atual+char 
+
+                if estado_atual >= len(estados):
+                    return f'{x} Cadeia não reconhecida'
+
+                for regex, prox in estados[estado_atual].items():
+                    if re.match(f'^{regex}$', char):
+                        estado_atual = prox
+                        break
+
+            if estado_atual in finais:
+                palavra=f'{cadeia_atual} - Cadeia aceita como:  [{finais[estado_atual]}]'
+                palavra=(palavra.replace("LEXEMA", str(cadeia_atual)))
+                palavra=(palavra.replace("linhaa", str(linha_num)))
+                palavra=(palavra.replace("PIII", str(linha.find(cadeia_atual))))
+                palavra=(palavra.replace("PFFF", str(linha.find(cadeia_atual)+len(cadeia_atual)-1)))
+                token.append(palavra)
+                estado_atual = 0
+                cadeia_atual=''
+            else:
+                palavra=f'{cadeia_atual} - Cadeia aceita como:  [{finais[10]}]'
+                palavra=(palavra.replace("LEXEMA", str(cadeia_atual)))
+                palavra=(palavra.replace("linhaa", str(linha_num)))
+                palavra=(palavra.replace("PIII", str(linha.find(cadeia_atual))))
+                palavra=(palavra.replace("PFFF", str(linha.find(cadeia_atual)+len(cadeia_atual)-1)))
+                token.append(palavra)
+
+    return(token)
+
+
+lexico=(anaLIzador(open('compilador/Teste.py', 'r')))
+for x in lexico:
+    print(x)
+# print(anaLIzador('ELSE'))
+# print(anaLIzador('PRINT'))
+# print(anaLIzador('FOR'))
+# print(anaLIzador('SWITCH'))
+# print(anaLIzador('WHILE'))
+# print(anaLIzador('DO'))
+# print(anaLIzador('READ'))
+# print(anaLIzador('FOREACH'))
+# print(anaLIzador('JOAO'))
+
+# print(anaLIzador('+'))
+# print(anaLIzador('-'))
+# print(anaLIzador('*'))
+# print(anaLIzador('/'))
+# print(anaLIzador('%'))
+# print(anaLIzador('--'))
+# print(anaLIzador('++'))
+# print(anaLIzador('<'))
+# print(anaLIzador('>'))
+# print(anaLIzador('<='))
+# print(anaLIzador('>='))
+# print(anaLIzador('^'))
+# print(anaLIzador('('))
+# print(anaLIzador(')'))
+# print(anaLIzador('['))
+# print(anaLIzador(']'))
+# print(anaLIzador('{'))
+# print(anaLIzador('}'))
