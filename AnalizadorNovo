@@ -1,0 +1,141 @@
+class Analizador:
+
+    def __init__(self, entrada):
+        NAO_TERMINAIS = {
+        0: 'programa',
+        1: 'lblocos',
+        2: 'bloco',
+        3: 'func',
+        4: 'switch',
+        5: 'if',
+        6: 'while',
+        7: 'op',
+        8: 'ids',
+        9: 'dec',
+        10: 'atr',
+        11: 'tipo',
+        12: 'varfun',
+        13: 'else',
+        14: 'exp',
+        15: 'expl',
+        16: 'exp2',
+        17: 'incremento'
+        }
+
+        afd = {
+            0: {'ACTION': {'programa': 'S 2'}, 'GOTO': {}},
+            1:{'ACTION':{'$':'ACC '},'GOTO':{}},
+            2:{'ACTION':{'IF':'S 12','SWITCH':'S 11','WHILE':'S 13','DEF':'S 10','INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            3:{'ACTION':{'FIM':'S 18'},'GOTO':{}},
+            4:{'ACTION':{'IF':'S 12','SWITCH':'S 11','WHILE':'S 13','DEF':'S 10','INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            5:{'ACTION':{''}},
+            6:{'ACTION':{},'GOTO':{}},
+            7:{'ACTION':{},'GOTO':{}},
+            8:{'ACTION':{},'GOTO':{}},
+            9:{'ACTION':{},'GOTO':{}},
+            10:{'ACTION':{'id':'S 20'},'GOTO':{}},
+            11:{'ACTION':{'abrepar':'S 21'},'GOTO':{}},
+            12:{'ACTION':{'abrepar':'S 22'},'GOTO':{}},
+            13:{'ACTION':{'abrepar':'S 23'},'GOTO':{}},
+            14:{'ACTION':{'id':'S 24'},'GOTO':{}},
+            15:{'ACTION':{},'GOTO':{}},
+            16:{'ACTION':{},'GOTO':{}},
+            17:{'ACTION':{},'GOTO':{}},
+            18:{'ACTION':{},'GOTO':{}},
+            19:{'ACTION':{},'GOTO':{}},
+            20:{'ACTION':{'abrepar':'S 25'},'GOTO':{}},
+            21:{'ACTION':{'mais':'S 27','menos':'S 28','mult':'S 29','div':'S 30','menorque':'S 31','maiorque':'S 32','menorigual':'S 33','maiorigual':'S 34','comparacao':'S 35'},'GOTO':{}},
+            22:{'ACTION':{'id':'S 38','abrepar':'S 40','INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            23:{'ACTION':{'id':'S 38','abrepar':'S 40','INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            24:{'ACTION':{'menosmenos':'S 46','maismais':'S 45','atr':'S 43'},'GOTO':{}},
+            25:{'ACTION':{'INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            26:{'ACTION':{'fechapar':'S 49'},'GOTO':{}},
+            27:{'ACTION':{},'GOTO':{}},
+            28:{'ACTION':{},'GOTO':{}},
+            29:{'ACTION':{},'GOTO':{}},
+            30:{'ACTION':{},'GOTO':{}},
+            31:{'ACTION':{},'GOTO':{}},
+            32:{'ACTION':{},'GOTO':{}},
+            33:{'ACTION':{},'GOTO':{}},
+            34:{'ACTION':{},'GOTO':{}},
+            35:{'ACTION':{},'GOTO':{}},
+            36:{'ACTION':{'fechapar':'S 50'},'GOTO':{}},
+            37:{'ACTION':{'id':'S 38','mais':'S 27','menos':'S 28','mult':'S 29','div':'S 30','menorque':'S 31','maiorque':'S 32','menorigual':'S 33','maiorigual':'S 34','comparacao':'S 35','abrepar':'S 40','INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            38:{'ACTION':{},'GOTO':{}},
+            39:{'ACTION':{},'GOTO':{}},
+            40:{'ACTION':{'id':'S 38','abrepar':'S 40','INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            41:{'ACTION':{'fechapar':'S 55'},'GOTO':{}},
+            42:{'ACTION':{},'GOTO':{}},
+            43:{'ACTION':{'INT':'S 57','STRING':'S 58','CHAR':'S 59'},'GOTO':{}},
+            44:{'ACTION':{},'GOTO':{}},
+            45:{'ACTION':{},'GOTO':{}},
+            46:{'ACTION':{},'GOTO':{}},
+            47:{'ACTION':{'fechapar':'S 60'},'GOTO':{}},
+            48:{'ACTION':{'INT':'S 57','STRING':'S 58','CHAR':'S 59'},'GOTO':{}},
+            49:{'ACTION':{},'GOTO':{}},
+            50:{'ACTION':{'abrecha':'S 62'},'GOTO':{}},
+            51:{'ACTION':{},'GOTO':{}},
+            52:{'ACTION':{'id':'S 38','abrepar':'S 40','INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            53:{'ACTION':{},'GOTO':{}},
+            54:{'ACTION':{'fechapar':'S 64'},'GOTO':{}},
+            55:{'ACTION':{'abrecha':'S 65'},'GOTO':{}},
+            56:{'ACTION':{},'GOTO':{}},
+            57:{'ACTION':{},'GOTO':{}},
+            58:{'ACTION':{},'GOTO':{}},
+            59:{'ACTION':{},'GOTO':{}},
+            60:{'ACTION':{'abrecha':'S 66'},'GOTO':{}},
+            61:{'ACTION':{'INT':'S 15','STRING':'S 16','CHAR':'S 17'},'GOTO':{}},
+            62:{'ACTION':{'INT':'S 15','STRING':'S 16','CHAR':'S 17','IF':'S 12','SWITCH':'S 11','WHILE':'S 13','DEF':'S 10'},'GOTO':{}},
+            63:{'ACTION':{},'GOTO':{}},
+            64:{'ACTION':{},'GOTO':{}},
+            65:{'ACTION':{'INT':'S 15','STRING':'S 16','CHAR':'S 17','IF':'S 12','SWITCH':'S 11','WHILE':'S 13','DEF':'S 10'},'GOTO':{}},
+            66:{'ACTION':{'INT':'S 15','STRING':'S 16','CHAR':'S 17','IF':'S 12','SWITCH':'S 11','WHILE':'S 13'},'GOTO':{}},
+            67:{'ACTION':{},'GOTO':{}},
+            68:{'ACTION':{'fechacha':'S 71'},'GOTO':{}},
+            69:{'ACTION':{'fechacha':'S 72'},'GOTO':{}},
+            70:{'ACTION':{'fechacha':'S 73'},'GOTO':{}},
+            71:{'ACTION':{'else':'S 75'},'GOTO':{}},
+            72:{'ACTION':{},'GOTO':{}},
+            73:{'ACTION':{},'GOTO':{}},
+            74:{'ACTION':{},'GOTO':{}},
+            75:{'ACTION':{'abrecha':'S 76'},'GOTO':{}},
+            76:{'ACTION':{'id':'S 38','INT':'S 15','STRING':'S 16','CHAR':'S 17','abrepar':'S 40'},'GOTO':{}},
+            77:{'ACTION':{'fechacha':'S 78'},'GOTO':{}},
+            78:{'ACTION':{},'GOTO':{}}
+        }
+
+        pilha = []
+        pilha.append(0)
+        print("\nPilha:", ' '.join(map(str, pilha)))
+        i = 0
+        while entrada:
+            print(pilha)
+            if entrada[i] in afd[pilha[-1]]['ACTION']:
+                move = afd[pilha[-1]]['ACTION'][entrada[i]]
+            else:
+                return False
+            acao = move.split(' ')
+            print(" | Ação:", move)
+            if acao[0] == 'S': # Shift - Empilha e avança o ponteiro
+                pilha.append(acao[1])
+                i += 1
+            elif acao[0] == 'R': # Reduce - Desempilha e Desvia (para indicar a redução)
+                for _ in range(int(acao[1])):
+                    pilha.pop()
+                print(' | Reduziu para', NAO_TERMINAIS[acao[2]])
+                desvio = afd[pilha[-1]]['GOTO'][acao[2]][entrada[i]]
+                pilha.append(desvio)
+            elif acao[0] == 'ACC': # Accept
+                print('Ok')
+                return True
+            else:
+                print('Erro')
+                return False
+            print("\nPilha:", ' '.join(map(str, pilha)))
+            print(entrada[i])
+
+        # entrada = ['programa', 'id', 'abrepar', 'fechapar', 'abrecha', 'IF', 'abrepar', 'id', 'atr', 'INT', 'fechacha', 'abrecha', 'id', 'maismais', 'fechacha', 'else', 'abrecha', 'id', 'atr', 'STRING', 'fechacha', 'fechacha', '$']
+        # if slr.parser(entrada):
+        #     print("\nLinguagem aceita")
+        # else:
+        #     print("\nErro ao processar entrada")
