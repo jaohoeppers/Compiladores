@@ -1,0 +1,74 @@
+package scanner1;
+
+import java_cup.runtime.*;
+import java.io.*;
+
+terminal id, intt, string, numero, palavra, iff, elsee, switchh, whilee, abrecha, fechacha, menos, mais, mult, div, menosmenos, maismais, menorque, maiorque, menorigual, maiorigual, comparacao, abrepar, fechapar, atr, pv, inicio, fim, def;
+
+non terminal PROGRAMA, LBLOCOS, BLOCO, FUNC, SWITCH, IF, ELSE, WHILE, OP, DEC, ATR, TIPO, VARFUN, EXP, EXPL, EXP2, INCREMENTO, VAL;
+
+PROGRAMA ::= inicio LBLOCOS fim pv
+			;
+LBLOCOS ::= BLOCO LBLOCOS
+			|
+			;
+BLOCO ::= FUNC
+		|SWITCH
+		|IF
+		|WHILE
+		|DEC
+		;
+FUNC ::= def id abrepar VARFUN fechapar abrecha LBLOCOS fechacha pv
+		;
+SWITCH ::= switchh abrepar OP fechacha pv
+		;
+IF ::= iff abrepar EXP fechapar abrecha LBLOCOS fechacha ELSE pv
+		;
+ELSE ::= elsee abrecha LBLOCOS fechacha
+		|
+		;
+WHILE ::= whilee abrepar EXP fechapar abrecha LBLOCOS fechacha pv
+		;
+
+OP ::= mais
+		|menos
+		|mult
+		|div
+		|menorque
+		|maiorque
+		|menorigual
+		|maiorigual
+		|comparacao
+		;
+INCREMENTO ::= maismais
+			|menosmenos
+			;
+
+EXP ::= EXP2 EXPL
+		;
+EXPL ::= OP EXP2
+		|EXP2
+		|
+		;
+EXP2 ::= id
+		|DEC
+		|abrepar EXP fechapar
+		;
+
+VAL ::=  numero
+        |palavra
+        ;
+TIPO ::= intt
+		|string
+		;
+DEC ::= TIPO id atr VAL
+		;
+ATR ::= atr VAL
+		|INCREMENTO
+		;
+VARFUN ::=  TIPO id ATR VARFUN
+		|
+		;
+
+
+
