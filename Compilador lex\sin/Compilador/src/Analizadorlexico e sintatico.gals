@@ -1,0 +1,94 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = Java
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+ScannerCaseSensitive = true
+ScannerTable = Full
+Input = Stream
+Parser = SLR
+#RegularDefinitions
+letra:[a-zA-Z]
+Digito:[0-9]
+es:[\ \t\n\r\s]
+
+numero:{Digito}*
+
+
+asp:[\"]
+ac:[\{]
+
+#Tokens
+id:{letra}({letra}|{numero})*
+
+intt=id:"INT"
+def=id:"DEF"
+iff=id:"IF"
+elsee=id:"ELSE"
+switchh=id:"SWITCH"
+whilee=id:"WHILE"
+inicio=id:"INICIO"
+fim=id:"FIM"
+numero:{numero}
+
+abrecha:{ac}
+fechacha:"}"
+menos:"-"
+mais:"+"
+mult:"*"
+div:"/"
+menosmenos:"--"
+maismais:"++"
+menorque:"<"
+maiorque:">"
+menorigual:"<="
+maiorigual:">="
+comparacao:"=="
+abrepar:"("
+fechapar:")"
+atr:"="
+pv:";"
+:{es}
+#NonTerminals
+<programa>
+<lblocos>
+<bloco>
+<func>
+<switch>
+<if>
+<else>
+<while>
+<op>
+<dec>
+<atr>
+<tipo>
+<varfun>
+<exp>
+<expl>
+<exp2>
+<incremento>
+<val>
+#Grammar
+<programa>::= inicio <lblocos> fim pv;
+<lblocos>::= <bloco> <lblocos> |î;
+<bloco>::= <func>|<switch>|<if>|<while>|<dec>;
+<func>::= def id abrepar <varfun> fechapar abrecha <lblocos> fechacha pv;
+<switch>::= switchh abrepar <op> fechapar pv;
+<if>::= iff abrepar <exp> fechapar abrecha <lblocos> fechacha <else> pv;
+<else>::= elsee abrecha <lblocos> fechacha |î;
+<while>::= whilee abrepar <exp> fechapar abrecha <lblocos> fechacha pv;
+
+<op>::= mais|menos|mult|div|menorque|maiorque|menorigual|maiorigual|comparacao;
+<incremento>::= maismais|menosmenos;
+
+<exp>::= <exp2><expl>;
+<expl>::= <op><exp2>|<exp2>|î;
+<exp2>::= id|<dec>|abrepar <exp> fechapar;
+
+<val>::= numero;
+<tipo>::= intt;
+<dec>::= <tipo> id <atr> <val>;
+<atr>::= atr <val>|<incremento>;
+<varfun>::=  <tipo> id <atr> <varfun>|î;
